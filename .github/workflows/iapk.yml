@@ -168,7 +168,13 @@ jobs:
 
           make defconfig
           make package/netbird/compile V=s CONFIG_NETBIRD_COMPRESS_UPX=y
-          mkdir -p packed && find bin/ -type f -name '*netbird*' -exec mv -t packed {} +
+          mkdir -p packed
+          # 🔥 唯一修复：重命名文件，解决APK同名冲突
+          find bin/ -type f -name '*netbird*' | while read file; do
+            ext="${file##*.}"
+            new_name="netbird_${{ matrix.target.type }}_${{ matrix.target.arch }}.${ext}"
+            mv "$file" "packed/$new_name"
+          done
 
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v4
